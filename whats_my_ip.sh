@@ -2,15 +2,25 @@
 
 # Function to get IP and location
 display_info() {
-    # Check if connected to Tor by using torsocks
-    if torsocks curl -s https://check.torproject.org/api/ip > /dev/null 2>&1; then
-        IP_INFO=$(torsocks curl -s https://ipinfo.io/json)
+    TOR_PROXY="--socks5-hostname 127.0.0.1:9050"
+    
+    # Check if using Tor
+    if curl -s $TOR_PROXY https://check.torproject.org/api/ip > /dev/null 2>&1; then
+        PUBLIC_IP=$(curl -s $TOR_PROXY https://check.torproject.org/api/ip | jq -r .IP)
+        IP_INFO=$(curl -s $TOR_PROXY https://ipwhois.app/json/$PUBLIC_IP)
     else
-        IP_INFO=$(curl -s https://ipinfo.io/json)
+        PUBLIC_IP=$(curl -s https://ifconfig.me)
+        IP_INFO=$(curl -s https://ipwhois.app/json/$PUBLIC_IP)
     fi
     
-    PUBLIC_IP=$(echo "$IP_INFO" | jq -r .ip)
     LOCATION=$(echo "$IP_INFO" | jq -r '.city + ", " + .region + ", " + .country')
+    
+    if [[ "$PUBLIC_IP" == "null" || -z "$PUBLIC_IP" ]]; then
+        PUBLIC_IP="Unknown (Tor may be blocking queries)"
+    fi
+    if [[ "$LOCATION" == "null" || -z "$LOCATION" ]]; then
+        LOCATION="Unknown"
+    fi
     
     zenity --info \
         --title="Public IP & Location" \
