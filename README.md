@@ -1,6 +1,5 @@
 Here's a customized `README.md` for your repository at `https://github.com/GlitchLinux/whats_my_ip`:
 
-```markdown
 # What's My IP - Tor/Clearnet IP Checker
 
 ![GitHub](https://img.shields.io/github/license/GlitchLinux/whats_my_ip)
